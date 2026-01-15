@@ -50,6 +50,8 @@ public class RobotContainer {
   // Dashboard inputs
   private final LoggedDashboardChooser<Command> autoChooser;
 
+  private boolean m_teleopInitialized = false;
+
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
     switch (Constants.currentMode) {
@@ -191,6 +193,24 @@ public class RobotContainer {
    * @return the command to run in autonomous
    */
   public Command getAutonomousCommand() {
-    return autoChooser.get();
+    Command autoCommand = autoChooser.get();
+    // turnoff updating odometry based on april tags
+    vision.enableUpdateOdometryBasedOnApriltags();
+    if (autoCommand != null) {
+      // tell vision autonomous path is updated
+      vision.updateAutonomous();
+    }
+    return autoCommand;
+  }
+
+  public void teleopInit() {
+    if (!this.m_teleopInitialized) {
+      vision.updateStartingPosition();
+      vision.enableUpdateOdometryBasedOnApriltags();
+      m_teleopInitialized = true;
+      // TODO uncomment
+      //   SignalLogger.setPath("/media/sda1/");
+      //   SignalLogger.start();
+    }
   }
 }
