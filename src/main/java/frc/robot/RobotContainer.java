@@ -16,6 +16,7 @@ import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
+import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.commands.DriveCommands;
@@ -26,6 +27,7 @@ import frc.robot.subsystems.drive.GyroIOPigeon2;
 import frc.robot.subsystems.drive.ModuleIO;
 import frc.robot.subsystems.drive.ModuleIOSim;
 import frc.robot.subsystems.drive.ModuleIOTalonFX;
+import frc.robot.subsystems.launcher.LauncherSubsystem;
 import frc.robot.subsystems.vision.AprilTagVision;
 import frc.robot.subsystems.vision.VisionIO;
 import frc.robot.subsystems.vision.VisionIOLimelight;
@@ -43,6 +45,7 @@ public class RobotContainer {
 
   // Subsystems
   private final Drive drive;
+  private final LauncherSubsystem launcher;
 
   // Controller
   private final CommandXboxController controller = new CommandXboxController(0);
@@ -66,6 +69,8 @@ public class RobotContainer {
                 new ModuleIOTalonFX(TunerConstants.FrontRight),
                 new ModuleIOTalonFX(TunerConstants.BackLeft),
                 new ModuleIOTalonFX(TunerConstants.BackRight));
+
+        launcher = new LauncherSubsystem(1, "rio", 2, "rio");
 
         // The ModuleIOTalonFXS implementation provides an example implementation for
         // TalonFXS controller connected to a CANdi with a PWM encoder. The
@@ -107,6 +112,7 @@ public class RobotContainer {
                 drive::addVisionMeasurement,
                 new VisionIOPhotonVisionSim(camera0Name, robotToCamera0, drive::getPose),
                 new VisionIOPhotonVisionSim(camera1Name, robotToCamera1, drive::getPose));
+        launcher = new LauncherSubsystem(1, "rio", 2, "rio");
         break;
 
       default:
@@ -121,6 +127,8 @@ public class RobotContainer {
         vision =
             new AprilTagVision(
                 drive::setPose, drive::addVisionMeasurement, new VisionIO() {}, new VisionIO() {});
+
+        launcher = new LauncherSubsystem(1, "rio", 2, "rio");
         break;
     }
 
@@ -172,6 +180,14 @@ public class RobotContainer {
                 () -> -controller.getLeftX(),
                 () -> Rotation2d.kZero));
 
+    controller
+        .b()
+        .whileTrue(
+            new InstantCommand(
+                () -> {
+                  launcher.setLaunchSpeed(6);
+                  launcher.setIndexeSpeed(7);
+                }));
     // Switch to X pattern when X button is pressed
     controller.x().onTrue(Commands.runOnce(drive::stopWithX, drive));
 
