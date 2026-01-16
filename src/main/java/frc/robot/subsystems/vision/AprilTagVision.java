@@ -1,16 +1,19 @@
 package frc.robot.subsystems.vision;
 
+import static edu.wpi.first.units.Units.Meters;
 import static frc.robot.subsystems.vision.VisionConstants.aprilTagLayout;
 
 import edu.wpi.first.math.Vector;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.numbers.N3;
+import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.Robot;
+import frc.robot.generated.TunerConstants;
 import frc.robot.subsystems.vision.VisionIO.PoseObservation;
 import frc.robot.subsystems.vision.VisionIO.PoseObservationType;
 import java.util.Optional;
@@ -90,25 +93,30 @@ public class AprilTagVision extends Vision {
 
   /** Sets the robot position based on the alliance if there is one. */
   public void setRobotPositionBasedOnAlliance() {
-    Pose2d temp;
     Pose2d pose;
     Optional<Alliance> optionalAlliance = DriverStation.getAlliance();
     if (optionalAlliance.isPresent()) {
       Alliance alliance = optionalAlliance.get();
+      // Add bumper and frame on both sides to length TODO validate length
+      double robotLength = TunerConstants.kFrontLeftXPos.in(Meters) + Units.inchesToMeters(12.0);
       if (alliance == Alliance.Red) {
-        temp = aprilTagLayout.getTagPose(7).get().toPose2d();
+        Pose2d tag9Pose = aprilTagLayout.getTagPose(9).get().toPose2d();
+        Pose2d tag8Pose = aprilTagLayout.getTagPose(8).get().toPose2d();
         pose =
             new Pose2d(
-                temp.getX() + 2.0,
-                temp.getY(),
-                temp.getRotation().plus(Rotation2d.fromDegrees(180.0)));
+                // TODO maybe half the length of robot X axis front/back
+                tag9Pose.getX() + (robotLength / 2.0),
+                tag8Pose.getY(),
+                tag9Pose.getRotation().plus(Rotation2d.fromDegrees(180.0)));
       } else {
-        temp = aprilTagLayout.getTagPose(18).get().toPose2d();
+        Pose2d tag25Pose = aprilTagLayout.getTagPose(25).get().toPose2d();
+        Pose2d tag24Pose = aprilTagLayout.getTagPose(24).get().toPose2d();
         pose =
             new Pose2d(
-                temp.getX() - 2.0,
-                temp.getY(),
-                temp.getRotation().plus(Rotation2d.fromDegrees(180.0)));
+                // TODO maybe half the length of robot X axis front/back
+                tag25Pose.getX() - (robotLength / 2.0),
+                tag24Pose.getY(),
+                tag25Pose.getRotation().plus(Rotation2d.fromDegrees(180.0)));
       }
 
       m_ResetPose.accept(pose);
