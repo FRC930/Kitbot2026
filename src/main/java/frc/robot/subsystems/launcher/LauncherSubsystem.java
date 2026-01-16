@@ -6,28 +6,33 @@ package frc.robot.subsystems.launcher;
 
 import com.ctre.phoenix6.hardware.TalonFX;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-/** 
-   * Sets the controless the launcher and endexer
-   */
+
+/** Sets the controless the launcher and endexer */
 public class LauncherSubsystem extends SubsystemBase {
   /** Creates a new ExampleSubsystem. */
   TalonFX launcherMoter;
 
   TalonFX indexerMoter;
 
-  public LauncherSubsystem(int launcherMotorID, String launcherMotorCanBus, int indexerMotorID, String indexerMotorCanBus) {
+  public LauncherSubsystem(
+      int launcherMotorID,
+      String launcherMotorCanBus,
+      int indexerMotorID,
+      String indexerMotorCanBus) {
     launcherMoter = new TalonFX(launcherMotorID, launcherMotorCanBus);
     indexerMoter = new TalonFX(indexerMotorID, indexerMotorCanBus);
   }
-    /** 
-   * Sets the speed for the  Launcher
+  /**
+   * Sets the speed for the Launcher
+   *
    * @param speed
    */
   public void setLaunchSpeed(double speed) {
     launcherMoter.set(speed);
   }
-  /** 
+  /**
    * Sets the speed for the Indexe
+   *
    * @param speed
    */
   public void setIndexeSpeed(double speed) {
