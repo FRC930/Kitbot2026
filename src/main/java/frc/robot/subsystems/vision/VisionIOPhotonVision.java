@@ -1,4 +1,4 @@
-// Copyright (c) 2021-2026 Littleton Robotics
+// Copyright 2021-2025 FRC 6328
 // http://github.com/Mechanical-Advantage
 //
 // Use of this source code is governed by a BSD
@@ -22,6 +22,7 @@ import org.photonvision.PhotonCamera;
 public class VisionIOPhotonVision implements VisionIO {
   protected final PhotonCamera camera;
   protected final Transform3d robotToCamera;
+  private String cameraName;
 
   /**
    * Creates a new VisionIOPhotonVision.
@@ -30,6 +31,7 @@ public class VisionIOPhotonVision implements VisionIO {
    * @param robotToCamera The 3D position of the camera relative to the robot.
    */
   public VisionIOPhotonVision(String name, Transform3d robotToCamera) {
+    this.cameraName = name;
     camera = new PhotonCamera(name);
     this.robotToCamera = robotToCamera;
   }
@@ -37,7 +39,7 @@ public class VisionIOPhotonVision implements VisionIO {
   @Override
   public void updateInputs(VisionIOInputs inputs) {
     inputs.connected = camera.isConnected();
-
+    inputs.cameraName = this.cameraName;
     // Read new camera observations
     Set<Short> tagIds = new HashSet<>();
     List<PoseObservation> poseObservations = new LinkedList<>();
@@ -73,6 +75,7 @@ public class VisionIOPhotonVision implements VisionIO {
         // Add observation
         poseObservations.add(
             new PoseObservation(
+                cameraName,
                 result.getTimestampSeconds(), // Timestamp
                 robotPose, // 3D pose estimate
                 multitagResult.estimatedPose.ambiguity, // Ambiguity
@@ -99,6 +102,7 @@ public class VisionIOPhotonVision implements VisionIO {
           // Add observation
           poseObservations.add(
               new PoseObservation(
+                  cameraName,
                   result.getTimestampSeconds(), // Timestamp
                   robotPose, // 3D pose estimate
                   target.poseAmbiguity, // Ambiguity

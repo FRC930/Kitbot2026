@@ -92,7 +92,7 @@ public class RobotContainer {
         vision =
             new AprilTagVision(
                 drive::setPose,
-                drive::addVisionMeasurement,
+                drive::addVisionMeasurementAutoAlign,
                 new VisionIOLimelight(camera0Name, drive::getRotation),
                 new VisionIOLimelight(camera1Name, drive::getRotation));
         break;
@@ -109,7 +109,7 @@ public class RobotContainer {
         vision =
             new AprilTagVision(
                 drive::setPose,
-                drive::addVisionMeasurement,
+                drive::addVisionMeasurementAutoAlign,
                 new VisionIOPhotonVisionSim(camera0Name, robotToCamera0, drive::getPose),
                 new VisionIOPhotonVisionSim(camera1Name, robotToCamera1, drive::getPose));
         launcher = new LauncherSubsystem(1, "rio", 2, "rio");
@@ -126,7 +126,10 @@ public class RobotContainer {
                 new ModuleIO() {});
         vision =
             new AprilTagVision(
-                drive::setPose, drive::addVisionMeasurement, new VisionIO() {}, new VisionIO() {});
+                drive::setPose,
+                drive::addVisionMeasurementAutoAlign,
+                new VisionIO() {},
+                new VisionIO() {});
 
         launcher = new LauncherSubsystem(1, "rio", 2, "rio");
         break;
