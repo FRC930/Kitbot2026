@@ -7,6 +7,7 @@
 
 package frc.robot;
 
+import static edu.wpi.first.units.Units.Volts;
 import static frc.robot.subsystems.vision.VisionConstants.*;
 
 import com.pathplanner.lib.auto.AutoBuilder;
@@ -27,11 +28,15 @@ import frc.robot.subsystems.drive.GyroIOPigeon2;
 import frc.robot.subsystems.drive.ModuleIO;
 import frc.robot.subsystems.drive.ModuleIOSim;
 import frc.robot.subsystems.drive.ModuleIOTalonFX;
+import frc.robot.subsystems.launcher.LauncherIOSim;
+import frc.robot.subsystems.launcher.LauncherIOTalonFX;
 import frc.robot.subsystems.launcher.LauncherSubsystem;
 import frc.robot.subsystems.vision.AprilTagVision;
 import frc.robot.subsystems.vision.VisionIO;
 import frc.robot.subsystems.vision.VisionIOLimelight;
 import frc.robot.subsystems.vision.VisionIOPhotonVisionSim;
+import frc.robot.util.CANDef;
+import frc.robot.util.CANDef.CANBus;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 
 /**
@@ -57,6 +62,7 @@ public class RobotContainer {
 
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
+    CANDef.Builder rioCANBuilder = CANDef.builder().bus(CANBus.Rio);
     switch (Constants.currentMode) {
       case REAL:
         // Real robot, instantiate hardware IO implementations
@@ -70,7 +76,9 @@ public class RobotContainer {
                 new ModuleIOTalonFX(TunerConstants.BackLeft),
                 new ModuleIOTalonFX(TunerConstants.BackRight));
 
-        launcher = new LauncherSubsystem(1, "rio", 2, "rio");
+        launcher =
+            new LauncherSubsystem(
+                new LauncherIOTalonFX(rioCANBuilder.id(19).build(), rioCANBuilder.id(11).build()));
 
         // The ModuleIOTalonFXS implementation provides an example implementation for
         // TalonFXS controller connected to a CANdi with a PWM encoder. The
@@ -112,7 +120,7 @@ public class RobotContainer {
                 drive::addVisionMeasurementAutoAlign,
                 new VisionIOPhotonVisionSim(camera0Name, robotToCamera0, drive::getPose),
                 new VisionIOPhotonVisionSim(camera1Name, robotToCamera1, drive::getPose));
-        launcher = new LauncherSubsystem(1, "rio", 2, "rio");
+        launcher = new LauncherSubsystem(new LauncherIOSim());
         break;
 
       default:
@@ -131,7 +139,9 @@ public class RobotContainer {
                 new VisionIO() {},
                 new VisionIO() {});
 
-        launcher = new LauncherSubsystem(1, "rio", 2, "rio");
+        launcher =
+            new LauncherSubsystem(
+                new LauncherIOTalonFX(rioCANBuilder.id(19).build(), rioCANBuilder.id(11).build()));
         break;
     }
 
@@ -188,8 +198,8 @@ public class RobotContainer {
         .whileTrue(
             new InstantCommand(
                 () -> {
-                  launcher.setLaunchSpeed(6);
-                  launcher.setIndexeSpeed(7);
+                  launcher.setLaunchSpeed(Volts.of(7));
+                  launcher.setIndexerSpeed(Volts.of(7));
                 }));
     // Switch to X pattern when X button is pressed
     controller.x().onTrue(Commands.runOnce(drive::stopWithX, drive));
