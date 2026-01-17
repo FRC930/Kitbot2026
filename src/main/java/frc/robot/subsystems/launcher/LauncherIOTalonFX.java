@@ -4,6 +4,7 @@ import static edu.wpi.first.units.Units.Volts;
 
 import com.ctre.phoenix6.CANBus;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
+import com.ctre.phoenix6.controls.NeutralOut;
 import com.ctre.phoenix6.controls.VoltageOut;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.InvertedValue;
@@ -20,9 +21,14 @@ public class LauncherIOTalonFX implements LauncherIO {
   private VoltageOut indexerRequest;
   private Voltage indexerSetPoint = Volts.of(0);
 
+  /* Keep a neutral out so we can disable the motor */
+  private final NeutralOut m_brake = new NeutralOut();
+
   public LauncherIOTalonFX(int launcherMotorCAN, int indexerMotorCAN, CANBus canbus) {
     launcherMotor = new TalonFX(launcherMotorCAN, canbus);
     indexerMotor = new TalonFX(indexerMotorCAN, canbus);
+    launcherRequest = new VoltageOut(0.0);
+    indexerRequest = new VoltageOut(0.0);
     configureTalons();
   }
 
@@ -60,8 +66,10 @@ public class LauncherIOTalonFX implements LauncherIO {
 
   @Override
   public void stop() {
-    setLauncherTarget(Volts.of(0));
-    setIndexerTarget(Volts.of(0));
+    launcherMotor.setControl(m_brake);
+    indexerMotor.setControl(m_brake);
+    launcherSetPoint = Volts.of(0.0);
+    indexerSetPoint = Volts.of(0.0);
   }
 
   @Override
