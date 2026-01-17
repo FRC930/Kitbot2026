@@ -10,8 +10,8 @@ package frc.robot;
 import static edu.wpi.first.units.Units.Volts;
 import static frc.robot.subsystems.vision.VisionConstants.*;
 
+import com.ctre.phoenix6.CANBus;
 import com.pathplanner.lib.auto.AutoBuilder;
-import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.XboxController;
@@ -35,8 +35,6 @@ import frc.robot.subsystems.vision.AprilTagVision;
 import frc.robot.subsystems.vision.VisionIO;
 import frc.robot.subsystems.vision.VisionIOLimelight;
 import frc.robot.subsystems.vision.VisionIOPhotonVisionSim;
-import frc.robot.util.CANDef;
-import frc.robot.util.CANDef.CANBus;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 
 /**
@@ -62,7 +60,7 @@ public class RobotContainer {
 
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
-    CANDef.Builder rioCANBuilder = CANDef.builder().bus(CANBus.Rio);
+    CANBus canbus = new CANBus("rio");
     switch (Constants.currentMode) {
       case REAL:
         // Real robot, instantiate hardware IO implementations
@@ -76,9 +74,7 @@ public class RobotContainer {
                 new ModuleIOTalonFX(TunerConstants.BackLeft),
                 new ModuleIOTalonFX(TunerConstants.BackRight));
 
-        launcher =
-            new LauncherSubsystem(
-                new LauncherIOTalonFX(rioCANBuilder.id(19).build(), rioCANBuilder.id(11).build()));
+        launcher = new LauncherSubsystem(new LauncherIOTalonFX(19, 11, canbus));
 
         // The ModuleIOTalonFXS implementation provides an example implementation for
         // TalonFXS controller connected to a CANdi with a PWM encoder. The
@@ -139,9 +135,7 @@ public class RobotContainer {
                 new VisionIO() {},
                 new VisionIO() {});
 
-        launcher =
-            new LauncherSubsystem(
-                new LauncherIOTalonFX(rioCANBuilder.id(19).build(), rioCANBuilder.id(11).build()));
+        launcher = new LauncherSubsystem(new LauncherIOTalonFX(19, 11, canbus));
         break;
     }
 
@@ -201,25 +195,25 @@ public class RobotContainer {
                   launcher.setLaunchSpeed(Volts.of(2));
                   launcher.setIndexerSpeed(Volts.of(2));
                 }))
-                .onFalse(new InstantCommand(
-                  () -> {
-                    launcher.stop();
-                  }
-                ));
-                
+        .onFalse(
+            new InstantCommand(
+                () -> {
+                  launcher.stop();
+                }));
+
     // Switch to X pattern when X button is pressed
     controller.x().onTrue(Commands.runOnce(drive::stopWithX, drive));
 
     // Reset gyro to 0° when B button is pressed
-    controller
-        .b()
-        .onTrue(
-            Commands.runOnce(
-                    () ->
-                        drive.setPose(
-                            new Pose2d(drive.getPose().getTranslation(), Rotation2d.kZero)),
-                    drive)
-                .ignoringDisable(true));
+    // controller
+    //     .b()
+    //     .onTrue(
+    //         Commands.runOnce(
+    //                 () ->
+    //                     drive.setPose(
+    //                         new Pose2d(drive.getPose().getTranslation(), Rotation2d.kZero)),
+    //                 drive)
+    //             .ignoringDisable(true));
   }
 
   /**
