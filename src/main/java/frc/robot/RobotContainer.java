@@ -195,12 +195,18 @@ public class RobotContainer {
 
     controller
         .b()
-        .whileTrue(
+        .onTrue(
             new InstantCommand(
                 () -> {
-                  launcher.setLaunchSpeed(Volts.of(7));
-                  launcher.setIndexerSpeed(Volts.of(7));
-                }));
+                  launcher.setLaunchSpeed(Volts.of(2));
+                  launcher.setIndexerSpeed(Volts.of(2));
+                }))
+                .onFalse(new InstantCommand(
+                  () -> {
+                    launcher.stop();
+                  }
+                ));
+                
     // Switch to X pattern when X button is pressed
     controller.x().onTrue(Commands.runOnce(drive::stopWithX, drive));
 

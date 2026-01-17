@@ -31,4 +31,8 @@ public class LauncherSubsystem extends SubsystemBase {
   public void setIndexerSpeed(Voltage speed) {
     m_IO.setIndexerTarget(speed);
   }
+
+  public void stop() {
+    m_IO.stop();
+  }
 }

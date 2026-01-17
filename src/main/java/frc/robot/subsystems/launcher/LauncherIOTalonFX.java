@@ -23,7 +23,7 @@ public class LauncherIOTalonFX implements LauncherIO {
   }
 private void configureTalons() {
     TalonFXConfiguration configLauncher = new TalonFXConfiguration();
-    configLauncher.MotorOutput.NeutralMode = NeutralModeValue.Brake;
+    configLauncher.MotorOutput.NeutralMode = NeutralModeValue.Coast;
     configLauncher.CurrentLimits.StatorCurrentLimit = 80.0;
     configLauncher.CurrentLimits.StatorCurrentLimitEnable = true;
     configLauncher.CurrentLimits.SupplyCurrentLimit = 10.0;
@@ -34,7 +34,7 @@ private void configureTalons() {
     launcherMotor.getConfigurator().apply(configLauncher);
 
     TalonFXConfiguration configIndexer = new TalonFXConfiguration();
-    configIndexer.MotorOutput.NeutralMode = NeutralModeValue.Brake;
+    configIndexer.MotorOutput.NeutralMode = NeutralModeValue.Coast;
     configIndexer.CurrentLimits.StatorCurrentLimit = 80.0;
     configIndexer.CurrentLimits.StatorCurrentLimitEnable = true;
     configIndexer.CurrentLimits.SupplyCurrentLimit = 10.0;
