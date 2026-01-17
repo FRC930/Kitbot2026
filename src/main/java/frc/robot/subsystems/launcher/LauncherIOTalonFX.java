@@ -58,8 +58,7 @@ public class LauncherIOTalonFX implements LauncherIO {
 
   @Override
   public void setLauncherTarget(Voltage target) {
-    launcherRequest = launcherRequest.withOutput(target);
-    launcherMotor.setControl(launcherRequest);
+    launcherMotor.setControl(launcherRequest.withOutput(target));
     launcherSetPoint = target;
     // launcherMotor.set(target.in(Volts));
   }
@@ -74,8 +73,7 @@ public class LauncherIOTalonFX implements LauncherIO {
 
   @Override
   public void setIndexerTarget(Voltage target) {
-    indexerRequest = indexerRequest.withOutput(target);
-    indexerMotor.setControl(indexerRequest);
+    indexerMotor.setControl(indexerRequest.withOutput(target));
     indexerSetPoint = target;
     // indexerMotor.set(target.in(Volts));
   }
