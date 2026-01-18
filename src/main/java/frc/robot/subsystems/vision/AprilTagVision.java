@@ -97,15 +97,15 @@ public class AprilTagVision extends Vision {
     Optional<Alliance> optionalAlliance = DriverStation.getAlliance();
     if (optionalAlliance.isPresent()) {
       Alliance alliance = optionalAlliance.get();
-      // Add bumper and frame on both sides to length TODO validate length
-      double robotLength = TunerConstants.kFrontLeftXPos.in(Meters) + Units.inchesToMeters(12.0);
+      // Add bumper and frame to length of the center of the robot TODO validate length
+      double robotLength = TunerConstants.kFrontLeftXPos.in(Meters) + Units.inchesToMeters(6.0);
       if (alliance == Alliance.Red) {
         Pose2d tag9Pose = aprilTagLayout.getTagPose(9).get().toPose2d();
         Pose2d tag8Pose = aprilTagLayout.getTagPose(8).get().toPose2d();
         pose =
             new Pose2d(
                 // TODO maybe half the length of robot X axis front/back
-                tag9Pose.getX() + (robotLength / 2.0),
+                tag9Pose.getX() + (robotLength),
                 tag8Pose.getY(),
                 tag9Pose.getRotation().plus(Rotation2d.fromDegrees(180.0)));
       } else {
@@ -114,7 +114,7 @@ public class AprilTagVision extends Vision {
         pose =
             new Pose2d(
                 // TODO maybe half the length of robot X axis front/back
-                tag25Pose.getX() - (robotLength / 2.0),
+                tag25Pose.getX() - robotLength,
                 tag24Pose.getY(),
                 tag25Pose.getRotation().plus(Rotation2d.fromDegrees(180.0)));
       }

@@ -4,38 +4,53 @@
 
 package frc.robot.subsystems.launcher;
 
-import com.ctre.phoenix6.hardware.TalonFX;
+import static edu.wpi.first.units.Units.DegreesPerSecond;
+import static edu.wpi.first.units.Units.Volts;
+
+import edu.wpi.first.units.measure.Voltage;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import org.littletonrobotics.junction.Logger;
 
 /** Sets the controless the launcher and endexer */
 public class LauncherSubsystem extends SubsystemBase {
   /** Creates a new ExampleSubsystem. */
-  TalonFX launcherMoter;
+  private LauncherIO m_IO;
 
-  TalonFX indexerMoter;
+  private LauncherInputsAutoLogged logged = new LauncherInputsAutoLogged();
 
-  public LauncherSubsystem(
-      int launcherMotorID,
-      String launcherMotorCanBus,
-      int indexerMotorID,
-      String indexerMotorCanBus) {
-    launcherMoter = new TalonFX(launcherMotorID, launcherMotorCanBus);
-    indexerMoter = new TalonFX(indexerMotorID, indexerMotorCanBus);
+  public LauncherSubsystem(LauncherIO IO) {
+    m_IO = IO;
+    logged.launcherAngularVelocity = DegreesPerSecond.mutable(0);
+    logged.launcherVoltage = Volts.mutable(0);
+    logged.launcherSetVoltage = Volts.mutable(0);
+    logged.indexerAngularVelocity = DegreesPerSecond.mutable(0);
+    logged.indexerVoltage = Volts.mutable(0);
+    logged.indexerSetVoltage = Volts.mutable(0);
   }
   /**
    * Sets the speed for the Launcher
    *
    * @param speed
    */
-  public void setLaunchSpeed(double speed) {
-    launcherMoter.set(speed);
+  public void setLaunchSpeed(Voltage speed) {
+    m_IO.setLauncherTarget(speed);
   }
   /**
-   * Sets the speed for the Indexe
+   * Sets the speed for the Indexer
    *
    * @param speed
    */
-  public void setIndexeSpeed(double speed) {
-    indexerMoter.set(speed);
+  public void setIndexerSpeed(Voltage speed) {
+    m_IO.setIndexerTarget(speed);
+  }
+
+  public void stop() {
+    m_IO.stop();
+  }
+
+  @Override
+  public void periodic() {
+    m_IO.updateInputs(logged);
+    Logger.processInputs("RobotState/Launcher", logged);
   }
 }
