@@ -19,7 +19,13 @@ import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import frc.robot.commands.DriveCommands;
 import frc.robot.generated.TunerConstants;
+import frc.robot.goals.RobotGoals;
+import frc.robot.goals.RobotGoalsBehavior;
+import frc.robot.operator.OperatorIntent;
+import frc.robot.state.MatchState;
 import frc.robot.subsystems.drive.Drive;
+import frc.robot.util.GoalBehavior;
+import frc.robot.util.SubsystemBehavior;
 import frc.robot.subsystems.drive.GyroIO;
 import frc.robot.subsystems.drive.GyroIOPigeon2;
 import frc.robot.subsystems.drive.ModuleIO;
@@ -51,6 +57,11 @@ public class RobotContainer {
 
   // Controller
   private final CommandXboxController controller = new CommandXboxController(0);
+
+  // Reactive architecture components
+  private final OperatorIntent operatorIntent;
+  private final MatchState matchState;
+  private final RobotGoals robotGoals;
 
   private boolean m_teleopInitialized = false;
   private AutoCommandManager autoCommandManager;
@@ -136,6 +147,23 @@ public class RobotContainer {
     }
 
     autoCommandManager = new AutoCommandManager(drive);
+
+    // Initialize reactive architecture
+    operatorIntent = new OperatorIntent(0);
+    matchState = new MatchState();
+    robotGoals = new RobotGoals();
+
+    // Create goal behaviors (wires operator intent → robot goals)
+    new RobotGoalsBehavior(robotGoals);
+
+    // TODO (students): Create subsystem behaviors here, e.g.:
+    // new LauncherBehavior(launcher);
+    // new DriveBehavior(drive);
+
+    // Configure all behaviors
+    GoalBehavior.configureAll(operatorIntent);
+    SubsystemBehavior.configureAll(robotGoals, matchState);
+
     // Configure the button bindings
     configureButtonBindings();
   }
