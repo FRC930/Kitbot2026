@@ -8,14 +8,20 @@ import static edu.wpi.first.units.Units.DegreesPerSecond;
 import static edu.wpi.first.units.Units.Volts;
 
 import edu.wpi.first.units.measure.Voltage;
+import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import edu.wpi.first.wpilibj2.command.button.Trigger;
+import frc.robot.goals.RobotGoal;
+import frc.robot.util.EnumState;
+
 import org.littletonrobotics.junction.Logger;
 
 /** Sets the controless the launcher and endexer */
-public class LauncherSubsystem extends SubsystemBase {
+public class LauncherSubsystem extends SubsystemBase implements LauncherEvents {
   /** Creates a new ExampleSubsystem. */
   private LauncherIO m_IO;
 
+  private final EnumState<LauncherState> currentGoal = new EnumState<>("Launcher/state", LauncherState.IDLE);
   private LauncherInputsAutoLogged logged = new LauncherInputsAutoLogged();
 
   public LauncherSubsystem(LauncherIO IO) {
@@ -44,6 +50,20 @@ public class LauncherSubsystem extends SubsystemBase {
     m_IO.setIndexerTarget(speed);
   }
 
+  public Command launchCommand() {
+    return runOnce(() -> {
+      setIndexerSpeed(Volts.of(2));
+      setLaunchSpeed(Volts.of(2));
+    });
+  }
+
+  public Command idleCommand() {
+    return runOnce(() -> {
+      setIndexerSpeed(Volts.of(0));
+      setLaunchSpeed(Volts.of(0));
+    });
+  }
+
   public void stop() {
     m_IO.stop();
   }
@@ -52,5 +72,13 @@ public class LauncherSubsystem extends SubsystemBase {
   public void periodic() {
     m_IO.updateInputs(logged);
     Logger.processInputs("RobotState/Launcher", logged);
+  }
+  @Override
+  public Trigger isIdleTrigger() {
+    return currentGoal.is(LauncherState.IDLE);
+  }
+  @Override
+  public Trigger isLaunchingTrigger() {
+    return currentGoal.is(LauncherState.LAUNCHING);
   }
 }

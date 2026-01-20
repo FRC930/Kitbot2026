@@ -31,6 +31,7 @@ import frc.robot.subsystems.drive.GyroIOPigeon2;
 import frc.robot.subsystems.drive.ModuleIO;
 import frc.robot.subsystems.drive.ModuleIOSim;
 import frc.robot.subsystems.drive.ModuleIOTalonFX;
+import frc.robot.subsystems.launcher.LauncherBehavior;
 import frc.robot.subsystems.launcher.LauncherIOSim;
 import frc.robot.subsystems.launcher.LauncherIOTalonFX;
 import frc.robot.subsystems.launcher.LauncherSubsystem;
@@ -155,6 +156,7 @@ public class RobotContainer {
 
     // Create goal behaviors (wires operator intent → robot goals)
     new RobotGoalsBehavior(robotGoals);
+    new LauncherBehavior(launcher);
 
     // TODO (students): Create subsystem behaviors here, e.g.:
     // new LauncherBehavior(launcher);
@@ -162,7 +164,7 @@ public class RobotContainer {
 
     // Configure all behaviors
     GoalBehavior.configureAll(operatorIntent);
-    SubsystemBehavior.configureAll(robotGoals, matchState);
+    SubsystemBehavior.configureAll(robotGoals, matchState, launcher);
 
     // Configure the button bindings
     configureButtonBindings();
@@ -192,20 +194,6 @@ public class RobotContainer {
     //             () -> -controller.getLeftY(),
     //             () -> -controller.getLeftX(),
     //             () -> Rotation2d.kZero));
-
-    controller
-        .b()
-        .onTrue(
-            new InstantCommand(
-                () -> {
-                  launcher.setLaunchSpeed(Volts.of(2));
-                  launcher.setIndexerSpeed(Volts.of(2));
-                }))
-        .onFalse(
-            new InstantCommand(
-                () -> {
-                  launcher.stop();
-                }));
 
     // Switch to X pattern when X button is pressed
     controller.x().onTrue(Commands.runOnce(drive::stopWithX, drive));

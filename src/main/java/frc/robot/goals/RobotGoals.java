@@ -21,12 +21,12 @@ public class RobotGoals extends VirtualSubsystem implements RobotGoalEvents {
 
     public RobotGoals() {}
 
-    public Command setGoal(RobotGoal goal) {
+    public Command setGoalCommand(RobotGoal goal) {
         return Commands.runOnce(() -> currentGoal.set(goal));
     }
 
     @Override
-    public Trigger isIdle() {
+    public Trigger isIdleTrigger() {
         return currentGoal.is(RobotGoal.IDLE);
     }
 
@@ -36,4 +36,9 @@ public class RobotGoals extends VirtualSubsystem implements RobotGoalEvents {
 
     @Override
     public void periodic() {}
+
+    @Override
+    public Trigger isLaunchingTrigger() {
+        return currentGoal.is(RobotGoal.LAUNCHING);
+    }
 }

@@ -9,5 +9,6 @@ import edu.wpi.first.wpilibj2.command.button.Trigger;
  * <p>TODO (students): Add triggers for each goal in RobotGoal enum
  */
 public interface RobotGoalEvents {
-    Trigger isIdle();
+    Trigger isIdleTrigger();
+    Trigger isLaunchingTrigger();
 }

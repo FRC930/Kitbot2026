@@ -23,11 +23,16 @@ public class OperatorIntent implements OperatorIntentEvents {
     }
 
     @Override
-    public Trigger wantsToScore() {
-        return driver.rightTrigger(0.5);
+    public Trigger wantsToScoreTrigger() {
+        return driver.b();
     }
 
     public CommandXboxController getDriver() {
         return driver;
+    }
+
+    @Override
+    public Trigger wantsToOutake() {
+        return driver.a();
     }
 }

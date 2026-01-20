@@ -9,5 +9,6 @@ import edu.wpi.first.wpilibj2.command.button.Trigger;
  * <p>TODO (students): Add intent triggers for your robot's actions
  */
 public interface OperatorIntentEvents {
-    Trigger wantsToScore();
+    Trigger wantsToScoreTrigger();
+    Trigger wantsToOutake();
 }
