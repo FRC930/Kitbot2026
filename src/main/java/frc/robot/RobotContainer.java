@@ -38,6 +38,7 @@ import frc.robot.subsystems.vision.AprilTagVision;
 import frc.robot.subsystems.vision.VisionIO;
 import frc.robot.subsystems.vision.VisionIOLimelight;
 import frc.robot.subsystems.vision.VisionIOPhotonVisionSim;
+import frc.robot.subsystems.vision.VisionIOQuest;
 import frc.robot.util.GoalBehavior;
 import frc.robot.util.SubsystemBehavior;
 
@@ -108,7 +109,8 @@ public class RobotContainer {
                 drive::setPose,
                 drive::addVisionMeasurementAutoAlign,
                 new VisionIOLimelight(camera0Name, drive::getRotation),
-                new VisionIOLimelight(camera1Name, drive::getRotation));
+                new VisionIOLimelight(camera1Name, drive::getRotation),
+                new VisionIOQuest(questCamName));
         break;
 
       case SIM:

@@ -16,7 +16,7 @@ public class VisionConstants {
   // AprilTag layout
   public static AprilTagFieldLayout aprilTagLayout =
       AprilTagFieldLayout.loadField(AprilTagFields.kDefaultField);
-
+  public static String questCamName = "Quest";
   // Camera names, must match names configured on coprocessor
   public static String camera0Name = "limelight-front";
   public static String camera1Name = "camera_1";

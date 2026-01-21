@@ -7,8 +7,11 @@
 
 package frc.robot.subsystems.vision;
 
+import edu.wpi.first.math.VecBuilder;
+import edu.wpi.first.math.Vector;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.numbers.N3;
 import org.littletonrobotics.junction.AutoLog;
 
 public interface VisionIO {
@@ -20,6 +23,13 @@ public interface VisionIO {
         new TargetObservation(Rotation2d.kZero, Rotation2d.kZero);
     public PoseObservation[] poseObservations = new PoseObservation[0];
     public int[] tagIds = new int[0];
+    public boolean isQuestPose = false;
+    public Vector<N3> QUESTNAV_STD_DEVS =
+        VecBuilder.fill(
+            0.02, // Trust down to 2cm in X direction
+            0.02, // Trust down to 2cm in Y direction
+            0.035 // Trust down to 2 degrees rotational
+            );
   }
 
   /** Represents the angle to a simple target, not used for pose estimation. */
@@ -38,7 +48,8 @@ public interface VisionIO {
   public static enum PoseObservationType {
     MEGATAG_1,
     MEGATAG_2,
-    PHOTONVISION
+    PHOTONVISION,
+    QUEST
   }
 
   public default void updateInputs(VisionIOInputs inputs) {}
