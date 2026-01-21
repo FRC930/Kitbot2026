@@ -23,137 +23,136 @@ import org.littletonrobotics.junction.networktables.LoggedNetworkNumber;
  * value not in dashboard.
  */
 public class LoggedTunableNumber implements DoubleSupplier {
-    private static final String tableKey = "/SmartDashboard/TunableNumbers";
-    private static final boolean tuningMode = Constants.tuningMode;
+  private static final String tableKey = "/SmartDashboard/TunableNumbers";
+  private static final boolean tuningMode = Constants.tuningMode;
 
-    private static List<String> initializedKeys = new ArrayList<>();
-    private static int collisionCount = 0;
+  private static List<String> initializedKeys = new ArrayList<>();
+  private static int collisionCount = 0;
 
-    private final String key;
-    private boolean hasDefault = false;
-    private double defaultValue;
-    private LoggedNetworkNumber dashboardNumber;
-    private Map<Integer, Double> lastHasChangedValues = new HashMap<>();
+  private final String key;
+  private boolean hasDefault = false;
+  private double defaultValue;
+  private LoggedNetworkNumber dashboardNumber;
+  private Map<Integer, Double> lastHasChangedValues = new HashMap<>();
 
-    /**
-     * Create a new LoggedTunableNumber
-     *
-     * @param dashboardKey Key on dashboard
-     */
-    public LoggedTunableNumber(String dashboardKey) {
-        this.key = getNoCollisionKey(tableKey + "/" + dashboardKey);
+  /**
+   * Create a new LoggedTunableNumber
+   *
+   * @param dashboardKey Key on dashboard
+   */
+  public LoggedTunableNumber(String dashboardKey) {
+    this.key = getNoCollisionKey(tableKey + "/" + dashboardKey);
+  }
+
+  /**
+   * Create a new LoggedTunableNumber with the default value
+   *
+   * @param dashboardKey Key on dashboard
+   * @param defaultValue Default value
+   */
+  public LoggedTunableNumber(String dashboardKey, double defaultValue) {
+    this(dashboardKey);
+    initDefault(defaultValue);
+  }
+
+  /**
+   * Set the default value of the number. The default value can only be set once.
+   *
+   * @param defaultValue The default value
+   */
+  public void initDefault(double defaultValue) {
+    if (!hasDefault) {
+      hasDefault = true;
+      this.defaultValue = defaultValue;
+      if (tuningMode) {
+        dashboardNumber = new LoggedNetworkNumber(key, defaultValue);
+      }
+    }
+  }
+
+  /**
+   * Ensures the given tunable number key does not already exist. If it does, appends as many
+   * numbers as are necessary to make it unique, and reports a warning.
+   */
+  public static String getNoCollisionKey(String key) {
+    String newKey = key;
+    int appendedNumber = 0;
+
+    while (initializedKeys.contains(newKey)) {
+      appendedNumber += 1;
+      collisionCount += 1;
+      newKey = "%s.%03d".formatted(key, appendedNumber);
     }
 
-    /**
-     * Create a new LoggedTunableNumber with the default value
-     *
-     * @param dashboardKey Key on dashboard
-     * @param defaultValue Default value
-     */
-    public LoggedTunableNumber(String dashboardKey, double defaultValue) {
-        this(dashboardKey);
-        initDefault(defaultValue);
+    if (appendedNumber != 0) {
+      DriverStation.reportWarning(
+          "%n!WARNING! - LoggedTunableNumber collision detected at key \"%s\"%nNew Key: \"%s\""
+              .formatted(key, newKey),
+          true);
+
+      System.out.println(">>> - - - - - COLLISION REPORT - - - - - <<<");
+      System.out.println("%d LoggedTubableNumber Collisions".formatted(collisionCount));
     }
 
-    /**
-     * Set the default value of the number. The default value can only be set once.
-     *
-     * @param defaultValue The default value
-     */
-    public void initDefault(double defaultValue) {
-        if (!hasDefault) {
-            hasDefault = true;
-            this.defaultValue = defaultValue;
-            if (tuningMode) {
-                dashboardNumber = new LoggedNetworkNumber(key, defaultValue);
-            }
-        }
+    initializedKeys.add(newKey);
+    return newKey;
+  }
+
+  /**
+   * Get the current value, from dashboard if available and in tuning mode.
+   *
+   * @return The current value
+   */
+  public double get() {
+    if (!hasDefault) {
+      return 0.0;
+    } else {
+      return tuningMode ? dashboardNumber.get() : defaultValue;
+    }
+  }
+
+  /**
+   * Checks whether the number has changed since our last check
+   *
+   * @param id Unique identifier for the caller to avoid conflicts when shared between multiple
+   *     objects. Recommended approach is to pass the result of "hashCode()"
+   * @return True if the number has changed since the last time this method was called, false
+   *     otherwise.
+   */
+  public boolean hasChanged(int id) {
+    double currentValue = get();
+    Double lastValue = lastHasChangedValues.get(id);
+    if (lastValue == null || currentValue != lastValue) {
+      lastHasChangedValues.put(id, currentValue);
+      return true;
     }
 
-    /**
-     * Ensures the given tunable number key does not already exist. If it does, appends as many
-     * numbers as are necessary to make it unique, and reports a warning.
-     */
-    public static String getNoCollisionKey(String key) {
-        String newKey = key;
-        int appendedNumber = 0;
+    return false;
+  }
 
-        while (initializedKeys.contains(newKey)) {
-            appendedNumber += 1;
-            collisionCount += 1;
-            newKey = "%s.%03d".formatted(key, appendedNumber);
-        }
-
-        if (appendedNumber != 0) {
-            DriverStation.reportWarning(
-                    "%n!WARNING! - LoggedTunableNumber collision detected at key \"%s\"%nNew Key: \"%s\""
-                            .formatted(key, newKey),
-                    true);
-
-            System.out.println(">>> - - - - - COLLISION REPORT - - - - - <<<");
-            System.out.println("%d LoggedTubableNumber Collisions".formatted(collisionCount));
-        }
-
-        initializedKeys.add(newKey);
-        return newKey;
+  /**
+   * Runs action if any of the tunableNumbers have changed
+   *
+   * @param id Unique identifier for the caller to avoid conflicts when shared between multiple
+   *     objects. Recommended approach is to pass the result of "hashCode()"
+   * @param action Callback to run when any of the tunable numbers have changed. Access tunable
+   *     numbers in order inputted in method
+   * @param tunableNumbers All tunable numbers to check
+   */
+  public static void ifChanged(
+      int id, Consumer<double[]> action, LoggedTunableNumber... tunableNumbers) {
+    if (Arrays.stream(tunableNumbers).anyMatch(tunableNumber -> tunableNumber.hasChanged(id))) {
+      action.accept(Arrays.stream(tunableNumbers).mapToDouble(LoggedTunableNumber::get).toArray());
     }
+  }
 
-    /**
-     * Get the current value, from dashboard if available and in tuning mode.
-     *
-     * @return The current value
-     */
-    public double get() {
-        if (!hasDefault) {
-            return 0.0;
-        } else {
-            return tuningMode ? dashboardNumber.get() : defaultValue;
-        }
-    }
+  /** Runs action if any of the tunableNumbers have changed */
+  public static void ifChanged(int id, Runnable action, LoggedTunableNumber... tunableNumbers) {
+    ifChanged(id, values -> action.run(), tunableNumbers);
+  }
 
-    /**
-     * Checks whether the number has changed since our last check
-     *
-     * @param id Unique identifier for the caller to avoid conflicts when shared between multiple
-     *     objects. Recommended approach is to pass the result of "hashCode()"
-     * @return True if the number has changed since the last time this method was called, false
-     *     otherwise.
-     */
-    public boolean hasChanged(int id) {
-        double currentValue = get();
-        Double lastValue = lastHasChangedValues.get(id);
-        if (lastValue == null || currentValue != lastValue) {
-            lastHasChangedValues.put(id, currentValue);
-            return true;
-        }
-
-        return false;
-    }
-
-    /**
-     * Runs action if any of the tunableNumbers have changed
-     *
-     * @param id Unique identifier for the caller to avoid conflicts when shared between multiple
-     *     objects. Recommended approach is to pass the result of "hashCode()"
-     * @param action Callback to run when any of the tunable numbers have changed. Access tunable
-     *     numbers in order inputted in method
-     * @param tunableNumbers All tunable numbers to check
-     */
-    public static void ifChanged(
-            int id, Consumer<double[]> action, LoggedTunableNumber... tunableNumbers) {
-        if (Arrays.stream(tunableNumbers).anyMatch(tunableNumber -> tunableNumber.hasChanged(id))) {
-            action.accept(
-                    Arrays.stream(tunableNumbers).mapToDouble(LoggedTunableNumber::get).toArray());
-        }
-    }
-
-    /** Runs action if any of the tunableNumbers have changed */
-    public static void ifChanged(int id, Runnable action, LoggedTunableNumber... tunableNumbers) {
-        ifChanged(id, values -> action.run(), tunableNumbers);
-    }
-
-    @Override
-    public double getAsDouble() {
-        return get();
-    }
+  @Override
+  public double getAsDouble() {
+    return get();
+  }
 }
