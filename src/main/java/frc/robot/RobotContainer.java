@@ -10,11 +10,14 @@ package frc.robot;
 import static frc.robot.subsystems.vision.VisionConstants.*;
 
 import com.ctre.phoenix6.CANBus;
+import com.ctre.phoenix6.SignalLogger;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
+import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
+import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
 import frc.robot.commands.DriveCommands;
 import frc.robot.generated.TunerConstants;
 import frc.robot.goals.RobotGoals;
@@ -56,6 +59,7 @@ public class RobotContainer {
 
   // Controller
   private final CommandXboxController controller = new CommandXboxController(0);
+  private final CommandXboxController characterizeController = new CommandXboxController(4);
 
   // Reactive architecture components
   private final OperatorIntent operatorIntent;
@@ -166,6 +170,7 @@ public class RobotContainer {
 
     // Configure the button bindings
     configureButtonBindings();
+    configureCharacterizationButtonBindings();
   }
 
   /**
@@ -206,6 +211,49 @@ public class RobotContainer {
     //                         new Pose2d(drive.getPose().getTranslation(), Rotation2d.kZero)),
     //                 drive)
     //             .ignoringDisable(true));
+  }
+
+  public void configureCharacterizationButtonBindings() {
+    characterizeController
+        .back()
+        .and(characterizeController.y())
+        .whileTrue(drive.sysIdDynamic(Direction.kForward));
+    characterizeController
+        .back()
+        .and(characterizeController.x())
+        .whileTrue(drive.sysIdDynamic(Direction.kReverse));
+    characterizeController
+        .start()
+        .and(characterizeController.y())
+        .whileTrue(drive.sysIdQuasistatic(Direction.kForward));
+    characterizeController
+        .start()
+        .and(characterizeController.x())
+        .whileTrue(drive.sysIdQuasistatic(Direction.kReverse));
+
+    characterizeController
+        .povUp()
+        .whileTrue(DriveCommands.wheelRadiusCharacterization(drive))
+        .onFalse(DriveCommands.brakeDrive(drive));
+
+    characterizeController
+        .a()
+        .onTrue(
+            new InstantCommand(
+                () -> {
+                  SignalLogger.setPath("/media/sda1/logs");
+                  // SignalLogger.enableAutoLogging(true);
+                  SignalLogger.start();
+                  System.out.println("Started Logger");
+                }));
+    characterizeController
+        .b()
+        .onTrue(
+            new InstantCommand(
+                () -> {
+                  SignalLogger.stop();
+                  System.out.println("Stopped Logger");
+                }));
   }
 
   /**

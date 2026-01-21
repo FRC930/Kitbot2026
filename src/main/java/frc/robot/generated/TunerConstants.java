@@ -32,8 +32,14 @@ public class TunerConstants {
   // When using closed-loop control, the drive motor uses the control
   // output type specified by SwerveModuleConstants.DriveMotorClosedLoopOutput
   private static final Slot0Configs driveGains =
-      new Slot0Configs().withKP(0.1).withKI(0).withKD(0).withKS(0).withKV(0.124);
-
+      //   new Slot0Configs()
+      //       .withKP(0.49) // 0.2204171275
+      //       .withKI(0)
+      //       .withKD(0.0)
+      //       .withKS(0.125) // 0.155625
+      //       .withKV(0.734) // 0.7290475
+      //       .withKA(0.103); // 0.08876375;
+      new Slot0Configs().withKP(0.34).withKI(0).withKD(0).withKS(0.22).withKV(0.72).withKA(0.06);
   // The closed-loop output type to use for the steer motors;
   // This affects the PID/FF gains for the steer motors
   private static final ClosedLoopOutputType kSteerClosedLoopOutput = ClosedLoopOutputType.Voltage;
@@ -54,7 +60,7 @@ public class TunerConstants {
 
   // The stator current at which the wheels start to slip;
   // This needs to be tuned to your individual robot
-  private static final Current kSlipCurrent = Amps.of(120);
+  private static final Current kSlipCurrent = Amps.of(46);
 
   // Initial configs for the drive and steer motors and the azimuth encoder; these cannot be null.
   // Some configs will be overwritten; check the `with*InitialConfigs()` API documentation.
@@ -78,15 +84,20 @@ public class TunerConstants {
 
   // Theoretical free speed (m/s) at 12 V applied output;
   // This needs to be tuned to your individual robot
-  public static final LinearVelocity kSpeedAt12Volts = MetersPerSecond.of(5.24);
+  // Max theroretical speed 5.4
+  public static final LinearVelocity kSpeedAt12Volts = MetersPerSecond.of(4.81);
 
   // Every 1 rotation of the azimuth results in kCoupleRatio drive motor turns;
   // This may need to be tuned to your individual robot
   private static final double kCoupleRatio = 0;
 
   private static final double kDriveGearRatio = 5.8909090909090915;
-  private static final double kSteerGearRatio = 11.314285714285717;
-  private static final Distance kWheelRadius = Inches.of(2);
+  private static final double kSteerGearRatio = 12.1;
+  // ********** Wheel Radius Characterization Results **********
+  // Wheel Delta: 55.224 radians
+  // Gyro Delta: 6.245 radians
+  // Wheel Radius: 0.049 meters, 1.943 inches
+  private static final Distance kWheelRadius = Inches.of(1.943);
 
   private static final boolean kInvertLeftSide = false;
   private static final boolean kInvertRightSide = true;
