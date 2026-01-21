@@ -53,8 +53,8 @@ public class LauncherSubsystem extends SubsystemBase implements LauncherEvents {
   public Command launchCommand() {
     return runOnce(
         () -> {
-          setIndexerSpeed(Volts.of(2));
-          setLaunchSpeed(Volts.of(2));
+          setIndexerSpeed(Volts.of(4.0));
+          setLaunchSpeed(Volts.of(11.0));
         });
   }
 
