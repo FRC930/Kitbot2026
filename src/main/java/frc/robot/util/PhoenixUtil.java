@@ -35,55 +35,55 @@ import java.util.function.Supplier;
  */
 public class PhoenixUtil {
 
-    /**
-     * Attempts to run the command until no error is produced.
-     *
-     * @param maxAttempts Maximum number of attempts before giving up
-     * @param command The configuration command to run (should return StatusCode)
-     * @param device Optional device for better error reporting
-     * @return The final StatusCode (OK if successful, error code otherwise)
-     */
-    public static StatusCode tryUntilOk(
-            int maxAttempts, Supplier<StatusCode> command, Optional<ParentDevice> device) {
-        StatusCode error = StatusCode.NotFound;
-        for (int i = 0; i < maxAttempts; i++) {
-            error = command.get();
-            if (error.isOK()) break;
-            DriverStation.reportWarning(
-                    String.format(
-                            "Unable to configure device %s: %s",
-                            device.isPresent() ? device.get().getDeviceID() : "?", error.toString()),
-                    true);
-        }
-        return error;
+  /**
+   * Attempts to run the command until no error is produced.
+   *
+   * @param maxAttempts Maximum number of attempts before giving up
+   * @param command The configuration command to run (should return StatusCode)
+   * @param device Optional device for better error reporting
+   * @return The final StatusCode (OK if successful, error code otherwise)
+   */
+  public static StatusCode tryUntilOk(
+      int maxAttempts, Supplier<StatusCode> command, Optional<ParentDevice> device) {
+    StatusCode error = StatusCode.NotFound;
+    for (int i = 0; i < maxAttempts; i++) {
+      error = command.get();
+      if (error.isOK()) break;
+      DriverStation.reportWarning(
+          String.format(
+              "Unable to configure device %s: %s",
+              device.isPresent() ? device.get().getDeviceID() : "?", error.toString()),
+          true);
     }
+    return error;
+  }
 
-    /**
-     * Attempts to run the command until no error is produced (without device info for errors).
-     *
-     * @param maxAttempts Maximum number of attempts before giving up
-     * @param command The configuration command to run
-     * @return The final StatusCode
-     */
-    public static StatusCode tryUntilOk(int maxAttempts, Supplier<StatusCode> command) {
-        return tryUntilOk(maxAttempts, command, Optional.empty());
-    }
+  /**
+   * Attempts to run the command until no error is produced (without device info for errors).
+   *
+   * @param maxAttempts Maximum number of attempts before giving up
+   * @param command The configuration command to run
+   * @return The final StatusCode
+   */
+  public static StatusCode tryUntilOk(int maxAttempts, Supplier<StatusCode> command) {
+    return tryUntilOk(maxAttempts, command, Optional.empty());
+  }
 
-    /**
-     * Get position from controller without explicit casting. Handles cases where the position
-     * configuration may not be available yet due to delayed configurations.
-     *
-     * @param motor The motor to get position from
-     * @param defaultPosition Default value if position not available
-     * @return The position from the controller, or defaultPosition if not available
-     */
-    public static double getPositionFromController(ParentDevice motor, double defaultPosition) {
-        Map<String, String> map = motor.getAppliedControl().getControlInfo();
-        String positionString = map.get("Position");
-        double position = defaultPosition;
-        if (positionString != null) {
-            position = Double.valueOf(positionString);
-        }
-        return position;
+  /**
+   * Get position from controller without explicit casting. Handles cases where the position
+   * configuration may not be available yet due to delayed configurations.
+   *
+   * @param motor The motor to get position from
+   * @param defaultPosition Default value if position not available
+   * @return The position from the controller, or defaultPosition if not available
+   */
+  public static double getPositionFromController(ParentDevice motor, double defaultPosition) {
+    Map<String, String> map = motor.getAppliedControl().getControlInfo();
+    String positionString = map.get("Position");
+    double position = defaultPosition;
+    if (positionString != null) {
+      position = Double.valueOf(positionString);
     }
+    return position;
+  }
 }

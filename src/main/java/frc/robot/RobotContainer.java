@@ -7,7 +7,6 @@
 
 package frc.robot;
 
-import static edu.wpi.first.units.Units.Volts;
 import static frc.robot.subsystems.vision.VisionConstants.*;
 
 import com.ctre.phoenix6.CANBus;
@@ -15,7 +14,6 @@ import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
-import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import frc.robot.commands.DriveCommands;
 import frc.robot.generated.TunerConstants;
@@ -24,13 +22,12 @@ import frc.robot.goals.RobotGoalsBehavior;
 import frc.robot.operator.OperatorIntent;
 import frc.robot.state.MatchState;
 import frc.robot.subsystems.drive.Drive;
-import frc.robot.util.GoalBehavior;
-import frc.robot.util.SubsystemBehavior;
 import frc.robot.subsystems.drive.GyroIO;
 import frc.robot.subsystems.drive.GyroIOPigeon2;
 import frc.robot.subsystems.drive.ModuleIO;
 import frc.robot.subsystems.drive.ModuleIOSim;
 import frc.robot.subsystems.drive.ModuleIOTalonFX;
+import frc.robot.subsystems.launcher.LauncherBehavior;
 import frc.robot.subsystems.launcher.LauncherIOSim;
 import frc.robot.subsystems.launcher.LauncherIOTalonFX;
 import frc.robot.subsystems.launcher.LauncherSubsystem;
@@ -38,6 +35,8 @@ import frc.robot.subsystems.vision.AprilTagVision;
 import frc.robot.subsystems.vision.VisionIO;
 import frc.robot.subsystems.vision.VisionIOLimelight;
 import frc.robot.subsystems.vision.VisionIOPhotonVisionSim;
+import frc.robot.util.GoalBehavior;
+import frc.robot.util.SubsystemBehavior;
 
 /**
  * This class is where the bulk of the robot should be declared. Since Command-based is a
@@ -155,6 +154,7 @@ public class RobotContainer {
 
     // Create goal behaviors (wires operator intent → robot goals)
     new RobotGoalsBehavior(robotGoals);
+    new LauncherBehavior(launcher);
 
     // TODO (students): Create subsystem behaviors here, e.g.:
     // new LauncherBehavior(launcher);
@@ -162,7 +162,7 @@ public class RobotContainer {
 
     // Configure all behaviors
     GoalBehavior.configureAll(operatorIntent);
-    SubsystemBehavior.configureAll(robotGoals, matchState);
+    SubsystemBehavior.configureAll(robotGoals, matchState, launcher);
 
     // Configure the button bindings
     configureButtonBindings();
@@ -192,20 +192,6 @@ public class RobotContainer {
     //             () -> -controller.getLeftY(),
     //             () -> -controller.getLeftX(),
     //             () -> Rotation2d.kZero));
-
-    controller
-        .b()
-        .onTrue(
-            new InstantCommand(
-                () -> {
-                  launcher.setLaunchSpeed(Volts.of(2));
-                  launcher.setIndexerSpeed(Volts.of(2));
-                }))
-        .onFalse(
-            new InstantCommand(
-                () -> {
-                  launcher.stop();
-                }));
 
     // Switch to X pattern when X button is pressed
     controller.x().onTrue(Commands.runOnce(drive::stopWithX, drive));
