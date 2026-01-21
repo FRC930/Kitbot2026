@@ -25,7 +25,7 @@ public class RobotGoalsBehavior extends GoalBehavior {
   public void configure(OperatorIntentEvents intent) {
     intent
         .wantsToScoreTrigger()
-        .whileTrue(goals.setGoalCommand(RobotGoal.LAUNCHING))
-        .whileFalse(goals.setGoalCommand(RobotGoal.IDLE));
+        .onTrue(goals.setGoalCommand(RobotGoal.LAUNCHING))
+        .onFalse(goals.setGoalCommand(RobotGoal.IDLE));
   }
 }

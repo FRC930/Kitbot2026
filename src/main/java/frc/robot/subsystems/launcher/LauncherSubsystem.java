@@ -61,8 +61,7 @@ public class LauncherSubsystem extends SubsystemBase implements LauncherEvents {
   public Command idleCommand() {
     return runOnce(
         () -> {
-          setIndexerSpeed(Volts.of(0));
-          setLaunchSpeed(Volts.of(0));
+          stop();
         });
   }
 
