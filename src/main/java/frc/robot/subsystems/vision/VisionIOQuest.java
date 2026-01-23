@@ -29,10 +29,10 @@ public class VisionIOQuest implements VisionIO {
   private QuestNav questNav = new QuestNav();
   private final Transform3d ROBOT_TO_QUEST =
       new Transform3d(
-          Units.inchesToMeters(0.5),
-          Units.inchesToMeters(9.207),
-          Units.inchesToMeters(.0),
-          new Rotation3d(Rotation2d.fromDegrees(90)));
+          Units.inchesToMeters(14.0),
+          Units.inchesToMeters(6.0),
+          Units.inchesToMeters(10.5),
+          new Rotation3d(Rotation2d.fromDegrees(45)));
   private int questDebug = 0;
 
   /**
@@ -61,6 +61,7 @@ public class VisionIOQuest implements VisionIO {
     // Monitor connection and device status
     if (questNav.isConnected() && questNav.isTracking()) {
       List<PoseObservation> poseObservations = new LinkedList<>();
+      System.out.println("Tracking quest");
 
       // Get latest pose data
       PoseFrame[] newFrames = questNav.getAllUnreadPoseFrames();
