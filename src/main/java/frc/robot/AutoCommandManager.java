@@ -11,9 +11,11 @@ public class AutoCommandManager {
 
   // Dashboard inputs
   private final LoggedDashboardChooser<Command> autoChooser;
+  private Drive m_drive;
 
   public AutoCommandManager(Drive drive) {
     configureNamedCommands(drive);
+    m_drive = drive;
 
     // Set up auto routines
     autoChooser = new LoggedDashboardChooser<>("Auto Choices", AutoBuilder.buildAutoChooser());
@@ -36,7 +38,15 @@ public class AutoCommandManager {
   }
 
   public Command getAutonomousCommand() {
-    return autoChooser.get();
+    // return autoChooser.get();
+
+    Command // command =
+        // new InstantCommand(() -> m_drive.setPose(m_drive.getAutoAlignPose()))
+        // .andThen(new WaitCommand(1.0))
+        // .andThen(autoChooser.get());
+
+        command = autoChooser.get();
+    return command;
   }
 
   private void configureNamedCommands(Drive drive) {

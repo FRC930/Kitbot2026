@@ -137,7 +137,7 @@ public class Drive extends SubsystemBase {
         this::getChassisSpeeds,
         this::runVelocity,
         new PPHolonomicDriveController(
-            new PIDConstants(5.0, 0.0, 0.0), new PIDConstants(5.0, 0.0, 0.0)),
+            new PIDConstants(10.0, 0.0, 0.0), new PIDConstants(5.0, 0.0, 0.0)),
         PP_CONFIG,
         () -> DriverStation.getAlliance().orElse(Alliance.Blue) == Alliance.Red,
         this);
@@ -365,7 +365,8 @@ public class Drive extends SubsystemBase {
   public void addVisionMeasurement(
       Pose2d visionRobotPoseMeters,
       double timestampSeconds,
-      Matrix<N3, N1> visionMeasurementStdDevs) {
+      Matrix<N3, N1> visionMeasurementStdDevs,
+      boolean isQuest) {
     poseEstimator.addVisionMeasurement(
         visionRobotPoseMeters, timestampSeconds, visionMeasurementStdDevs);
   }
@@ -373,18 +374,24 @@ public class Drive extends SubsystemBase {
   public void addVisionMeasurementAutoAlign(
       Pose2d visionRobotPoseMeters,
       double timestampSeconds,
-      Matrix<N3, N1> visionMeasurementStdDevs) {
+      Matrix<N3, N1> visionMeasurementStdDevs,
+      boolean isQuest) {
     poseEstimatorAutoAlign.addVisionMeasurement(
         visionRobotPoseMeters, timestampSeconds, visionMeasurementStdDevs);
+    if (isQuest) {
+      poseEstimator.addVisionMeasurement(
+          visionRobotPoseMeters, timestampSeconds, visionMeasurementStdDevs);
+    }
   }
 
   public void addVisionMeasurementBoth(
       Pose2d visionRobotPoseMeters,
       double timestampSeconds,
-      Matrix<N3, N1> visionMeasurementStdDevs) {
-    addVisionMeasurement(visionRobotPoseMeters, timestampSeconds, visionMeasurementStdDevs);
+      Matrix<N3, N1> visionMeasurementStdDevs,
+      boolean isQuest) {
+    addVisionMeasurement(visionRobotPoseMeters, timestampSeconds, visionMeasurementStdDevs, false);
     addVisionMeasurementAutoAlign(
-        visionRobotPoseMeters, timestampSeconds, visionMeasurementStdDevs);
+        visionRobotPoseMeters, timestampSeconds, visionMeasurementStdDevs, false);
   }
 
   /** Returns the maximum linear speed in meters per sec. */

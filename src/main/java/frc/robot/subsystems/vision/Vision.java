@@ -125,7 +125,8 @@ public class Vision extends SubsystemBase {
           addVisionMeasurement(
               observation.pose().toPose2d(),
               observation.timestamp(),
-              inputs[cameraIndex].QUESTNAV_STD_DEVS);
+              inputs[cameraIndex].QUESTNAV_STD_DEVS,
+              true);
         } else {
           // Calculate standard deviations
           double stdDevFactor =
@@ -146,7 +147,8 @@ public class Vision extends SubsystemBase {
           addVisionMeasurement(
               observation.pose().toPose2d(),
               observation.timestamp(),
-              VecBuilder.fill(linearStdDev, linearStdDev, angularStdDev));
+              VecBuilder.fill(linearStdDev, linearStdDev, angularStdDev),
+              false);
         }
       }
       // Log camera metadata
@@ -182,14 +184,16 @@ public class Vision extends SubsystemBase {
     public void accept(
         Pose2d visionRobotPoseMeters,
         double timestampSeconds,
-        Matrix<N3, N1> visionMeasurementStdDevs);
+        Matrix<N3, N1> visionMeasurementStdDevs,
+        boolean isQuest);
   }
   // accepts the observation
   public boolean rejectPose(PoseObservation observation) {
     return false;
   }
   // accepts the vision measurements
-  public void addVisionMeasurement(Pose2d pose, double timestamp, Vector<N3> fill) {
-    consumer.accept(pose, timestamp, fill);
+  public void addVisionMeasurement(
+      Pose2d pose, double timestamp, Vector<N3> fill, boolean isQuest) {
+    consumer.accept(pose, timestamp, fill, isQuest);
   }
 }

@@ -75,7 +75,7 @@ public class VisionIOQuest implements VisionIO {
     // Monitor connection and device status
     if (questNav.isConnected() && questNav.isTracking() && m_initialPoseSet) {
       List<PoseObservation> poseObservations = new LinkedList<>();
-      System.out.println("Tracking quest");
+      // System.out.println("Tracking quest");
 
       // Get latest pose data
       PoseFrame[] newFrames = questNav.getAllUnreadPoseFrames();
