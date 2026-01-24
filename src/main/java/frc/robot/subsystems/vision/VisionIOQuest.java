@@ -13,26 +13,33 @@
 
 package frc.robot.subsystems.vision;
 
+import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.util.Units;
+import edu.wpi.first.wpilibj.DriverStation;
 import gg.questnav.questnav.PoseFrame;
 import gg.questnav.questnav.QuestNav;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.function.Supplier;
+import org.littletonrobotics.junction.Logger;
 
 /** IO implementation for real Limelight hardware. */
 public class VisionIOQuest implements VisionIO {
+  private Supplier<Pose2d> m_getPose;
   private String cameraName;
   private QuestNav questNav = new QuestNav();
+  private boolean m_initialPoseSet = false;
+  private boolean m_firstQuestPose = false;
   private final Transform3d ROBOT_TO_QUEST =
       new Transform3d(
           Units.inchesToMeters(14.0),
           Units.inchesToMeters(6.0),
           Units.inchesToMeters(10.5),
-          new Rotation3d(Rotation2d.fromDegrees(45)));
+          new Rotation3d(Rotation2d.fromDegrees(-45.0)));
   private int questDebug = 0;
 
   /**
@@ -41,8 +48,9 @@ public class VisionIOQuest implements VisionIO {
    * @param name The configured name of the Limelight.
    * @param rotationSupplier Supplier for the current estimated rotation, used for MegaTag 2.
    */
-  public VisionIOQuest(String name) {
+  public VisionIOQuest(Supplier<Pose2d> getPose, String name) {
     this.cameraName = name;
+    m_getPose = getPose;
   }
 
   @Override
@@ -58,8 +66,14 @@ public class VisionIOQuest implements VisionIO {
       questDebug = 0;
     }
 
+    if (!m_initialPoseSet && DriverStation.isEnabled()) {
+      Pose2d currentPose = m_getPose.get();
+      questNav.setPose(new Pose3d(currentPose).transformBy(ROBOT_TO_QUEST));
+      m_initialPoseSet = true;
+      Logger.recordOutput("currentPose", new Pose3d(currentPose).transformBy(ROBOT_TO_QUEST));
+    }
     // Monitor connection and device status
-    if (questNav.isConnected() && questNav.isTracking()) {
+    if (questNav.isConnected() && questNav.isTracking() && m_initialPoseSet) {
       List<PoseObservation> poseObservations = new LinkedList<>();
       System.out.println("Tracking quest");
 
@@ -74,6 +88,10 @@ public class VisionIOQuest implements VisionIO {
         // Get timestamp for when the data was sent
         double timestamp = questFrame.dataTimestamp();
 
+        // if (!m_firstQuestPose) {
+        //   Logger.recordOutput("QuestPose", questPose.transformBy(ROBOT_TO_QUEST.inverse()));
+        //   m_firstQuestPose = true;
+        // }
         poseObservations.add(
             new PoseObservation(
                 cameraName,
@@ -96,6 +114,10 @@ public class VisionIOQuest implements VisionIO {
       inputs.poseObservations = new PoseObservation[poseObservations.size()];
       for (int i = 0; i < poseObservations.size(); i++) {
         inputs.poseObservations[i] = poseObservations.get(i);
+      }
+      if (!m_firstQuestPose && poseObservations.size() > 0) {
+        Logger.recordOutput("QuestPose", poseObservations.get(poseObservations.size() - 1).pose());
+        m_firstQuestPose = true;
       }
     }
   }

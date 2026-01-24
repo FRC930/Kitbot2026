@@ -110,7 +110,7 @@ public class RobotContainer {
                 drive::addVisionMeasurementAutoAlign,
                 new VisionIOLimelight(camera0Name, drive::getRotation),
                 new VisionIOLimelight(camera1Name, drive::getRotation),
-                new VisionIOQuest(questCamName));
+                new VisionIOQuest(drive::getAutoAlignPose, questCamName));
         break;
 
       case SIM:
