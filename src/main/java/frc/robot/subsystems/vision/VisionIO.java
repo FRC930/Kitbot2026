@@ -37,7 +37,6 @@ public interface VisionIO {
 
   /** Represents a robot pose sample used for pose estimation. */
   public static record PoseObservation(
-      String cameraName,
       double timestamp,
       Pose3d pose,
       double ambiguity,

@@ -89,8 +89,6 @@ public class VisionIOLimelight implements VisionIO {
         }
         poseObservations.add(
             new PoseObservation(
-                cameraName,
-
                 // Timestamp, based on server timestamp of publish and latency
                 rawSample.timestamp * 1.0e-6 - rawSample.value[6] * 1.0e-3,
 
@@ -120,8 +118,6 @@ public class VisionIOLimelight implements VisionIO {
         }
         poseObservations.add(
             new PoseObservation(
-                cameraName,
-
                 // Timestamp, based on server timestamp of publish and latency
                 rawSample.timestamp * 1.0e-6 - rawSample.value[6] * 1.0e-3,
 

@@ -94,7 +94,6 @@ public class VisionIOQuest implements VisionIO {
         // }
         poseObservations.add(
             new PoseObservation(
-                cameraName,
                 // Timestamp, based on server timestamp of publish and latency
                 timestamp,
                 // 3D pose estimate

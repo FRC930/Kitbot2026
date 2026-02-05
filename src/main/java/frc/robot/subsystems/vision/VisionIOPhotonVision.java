@@ -75,7 +75,6 @@ public class VisionIOPhotonVision implements VisionIO {
         // Add observation
         poseObservations.add(
             new PoseObservation(
-                cameraName,
                 result.getTimestampSeconds(), // Timestamp
                 robotPose, // 3D pose estimate
                 multitagResult.estimatedPose.ambiguity, // Ambiguity
@@ -102,7 +101,6 @@ public class VisionIOPhotonVision implements VisionIO {
           // Add observation
           poseObservations.add(
               new PoseObservation(
-                  cameraName,
                   result.getTimestampSeconds(), // Timestamp
                   robotPose, // 3D pose estimate
                   target.poseAmbiguity, // Ambiguity
