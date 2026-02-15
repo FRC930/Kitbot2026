@@ -49,6 +49,12 @@ public class PhoenixUtil {
     for (int i = 0; i < maxAttempts; i++) {
       error = command.get();
       if (error.isOK()) break;
+      try {
+        Thread.currentThread().wait(1000);
+      } catch (InterruptedException e) {
+        // TODO Auto-generated catch block
+        e.printStackTrace();
+      }
       DriverStation.reportWarning(
           String.format(
               "Unable to configure device %s: %s",

@@ -31,6 +31,7 @@ import frc.robot.subsystems.drive.ModuleIO;
 import frc.robot.subsystems.drive.ModuleIOSim;
 import frc.robot.subsystems.drive.ModuleIOTalonFX;
 import frc.robot.subsystems.launcher.LauncherBehavior;
+import frc.robot.subsystems.launcher.LauncherIO;
 import frc.robot.subsystems.launcher.LauncherIOSim;
 import frc.robot.subsystems.launcher.LauncherIOTalonFX;
 import frc.robot.subsystems.launcher.LauncherSubsystem;
@@ -68,6 +69,8 @@ public class RobotContainer {
 
   private boolean m_teleopInitialized = false;
   private AutoCommandManager autoCommandManager;
+
+  private LauncherIO launcherIO;
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
     CANBus canbus = new CANBus("rio");
@@ -83,8 +86,8 @@ public class RobotContainer {
                 new ModuleIOTalonFX(TunerConstants.FrontRight),
                 new ModuleIOTalonFX(TunerConstants.BackLeft),
                 new ModuleIOTalonFX(TunerConstants.BackRight));
-
-        launcher = new LauncherSubsystem(new LauncherIOTalonFX(19, 11, canbus));
+        launcherIO = new LauncherIOTalonFX(19, 11, canbus);
+        launcher = new LauncherSubsystem(launcherIO);
 
         // The ModuleIOTalonFXS implementation provides an example implementation for
         // TalonFXS controller connected to a CANdi with a PWM encoder. The
@@ -279,7 +282,9 @@ public class RobotContainer {
       m_teleopInitialized = true;
       // TODO uncomment
       //   SignalLogger.setPath("/media/sda1/");
-      //   SignalLogger.start();
+      //   SignalLogger.start()
+      LauncherIOTalonFX c = (LauncherIOTalonFX) launcherIO;
+      c.configureTalons();
     }
   }
 }
