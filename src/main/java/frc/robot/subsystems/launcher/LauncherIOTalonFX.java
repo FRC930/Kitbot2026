@@ -34,7 +34,7 @@ public class LauncherIOTalonFX implements LauncherIO {
     launcherMotor = new TalonFX(launcherMotorCAN, canbus);
     indexerMotor = new TalonFX(indexerMotorCAN, canbus);
     launcherRequest = new VoltageOut(0.0);
-    indexerRequest = new VelocityVoltage(RPM.of(0.0)).withEnableFOC(false);
+    indexerRequest = new VelocityVoltage(RPM.of(0.0)).withEnableFOC(true);
     configureTalons();
   }
 
@@ -45,10 +45,9 @@ public class LauncherIOTalonFX implements LauncherIO {
     configLauncher.CurrentLimits.StatorCurrentLimitEnable = true;
     configLauncher.CurrentLimits.SupplyCurrentLimit = 10.0;
     configLauncher.CurrentLimits.SupplyCurrentLimitEnable = true;
-    configLauncher.Voltage.PeakForwardVoltage = 16.0;
-    configLauncher.Voltage.PeakReverseVoltage = 16.0;
+    configLauncher.Voltage.PeakForwardVoltage = 12.0;
+    configLauncher.Voltage.PeakReverseVoltage = -12.0;
     configLauncher.MotorOutput.Inverted = InvertedValue.CounterClockwise_Positive;
-    // launcherMotor.getConfigurator().apply(configLauncher);
     PhoenixUtil.tryUntilOk(
         5, () -> launcherMotor.getConfigurator().apply(new TalonFXConfiguration()));
     PhoenixUtil.tryUntilOk(5, () -> launcherMotor.getConfigurator().apply(configLauncher));
@@ -59,13 +58,11 @@ public class LauncherIOTalonFX implements LauncherIO {
     configIndexer.CurrentLimits.StatorCurrentLimitEnable = true;
     configIndexer.CurrentLimits.SupplyCurrentLimit = 10.0;
     configIndexer.CurrentLimits.SupplyCurrentLimitEnable = true;
-    configIndexer.Voltage.PeakForwardVoltage = 16.0;
-    configIndexer.Voltage.PeakReverseVoltage = 16.0;
+    configIndexer.Voltage.PeakForwardVoltage = 12.0;
+    configIndexer.Voltage.PeakReverseVoltage = -12.0;
     configIndexer.MotorOutput.Inverted = InvertedValue.Clockwise_Positive;
-    // indexerMotor.getConfigurator().apply(configIndexer);
     PhoenixUtil.tryUntilOk(
         5, () -> indexerMotor.getConfigurator().apply(new TalonFXConfiguration()));
-    // PhoenixUtil.tryUntilOk(5, () -> indexerMotor.setControl(indexerRequest));
     PhoenixUtil.tryUntilOk(5, () -> indexerMotor.getConfigurator().apply(configIndexer));
 
     setIndexerGains();
@@ -74,7 +71,7 @@ public class LauncherIOTalonFX implements LauncherIO {
   public void setIndexerGains() {
     Slot0Configs slot0Configs = new Slot0Configs();
     slot0Configs.GravityType = GravityTypeValue.Elevator_Static;
-    slot0Configs.kP = 0.001;
+    slot0Configs.kP = 0.5;
     slot0Configs.kI = 0.0;
     slot0Configs.kD = 0.0;
     slot0Configs.kS = 0.0;
@@ -94,7 +91,7 @@ public class LauncherIOTalonFX implements LauncherIO {
 
   @Override
   public void setLauncherTarget(Voltage target) {
-    launcherMotor.setControl(launcherRequest.withOutput(target));
+    // launcherMotor.setControl(launcherRequest.withOutput(target));
     launcherSetPoint = target;
     // launcherMotor.set(target.in(Volts));
   }
