@@ -13,6 +13,7 @@ import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.networktables.DoubleArrayPublisher;
 import edu.wpi.first.networktables.DoubleArraySubscriber;
+import edu.wpi.first.networktables.DoublePublisher;
 import edu.wpi.first.networktables.DoubleSubscriber;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.wpilibj.DriverStation;
@@ -27,6 +28,15 @@ import java.util.function.Supplier;
 public class VisionIOLimelight implements VisionIO {
   private final Supplier<Rotation2d> rotationSupplier;
   private final DoubleArrayPublisher orientationPublisher;
+  private final DoublePublisher imuMode;
+
+  private enum EnabledState {
+    INVALID,
+    DISABLED,
+    ENABLED,
+  };
+
+  private EnabledState m_isDisabled = EnabledState.INVALID;
 
   private final DoubleSubscriber latencySubscriber;
   private final DoubleSubscriber txSubscriber;
@@ -47,6 +57,7 @@ public class VisionIOLimelight implements VisionIO {
     var table = NetworkTableInstance.getDefault().getTable(name);
     this.rotationSupplier = rotationSupplier;
     orientationPublisher = table.getDoubleArrayTopic("robot_orientation_set").publish();
+    imuMode = table.getDoubleTopic("imumode_set").publish();
     latencySubscriber = table.getDoubleTopic("tl").subscribe(0.0);
     txSubscriber = table.getDoubleTopic("tx").subscribe(0.0);
     tySubscriber = table.getDoubleTopic("ty").subscribe(0.0);
@@ -57,6 +68,20 @@ public class VisionIOLimelight implements VisionIO {
 
   @Override
   public void updateInputs(VisionIOInputs inputs) {
+    // Set IMU mode based on enabled state;
+    // https://docs.limelightvision.io/docs/docs-limelight/pipeline-apriltag/apriltag-robot-localization-megatag2#using-limelight-4s-built-in-imu-with-imumode_set--setimumode
+    EnabledState newIsDisabled =
+        DriverStation.isDisabled() ? EnabledState.DISABLED : EnabledState.ENABLED;
+
+    if (!m_isDisabled.equals(newIsDisabled)) {
+      m_isDisabled = newIsDisabled;
+      if (newIsDisabled.equals(EnabledState.DISABLED)) {
+        imuMode.accept(1);
+      } else {
+        imuMode.accept(4);
+      }
+    }
+
     inputs.cameraName = this.cameraName;
     // Update connection status based on whether an update has been seen in the last 250ms
     inputs.connected =
@@ -89,7 +114,7 @@ public class VisionIOLimelight implements VisionIO {
         }
         poseObservations.add(
             new PoseObservation(
-                // Timestamp, based on server timestamp of publish and latency
+                cameraName, // Timestamp, based on server timestamp of publish and latency
                 rawSample.timestamp * 1.0e-6 - rawSample.value[6] * 1.0e-3,
 
                 // 3D pose estimate
@@ -118,6 +143,8 @@ public class VisionIOLimelight implements VisionIO {
         }
         poseObservations.add(
             new PoseObservation(
+                cameraName,
+
                 // Timestamp, based on server timestamp of publish and latency
                 rawSample.timestamp * 1.0e-6 - rawSample.value[6] * 1.0e-3,
 
